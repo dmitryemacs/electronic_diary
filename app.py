@@ -34,7 +34,7 @@ class User(UserMixin, db.Model):
     # Relationships
     teacher_classes = db.relationship('Class', backref='teacher', lazy=True)
     student_classes = db.relationship('StudentClass', backref='student', lazy=True)
-    grades = db.relationship('Grade', backref='student', lazy=True)
+    grades = db.relationship('Grade', backref='student', lazy=True, foreign_keys='Grade.student_id')
     assignments = db.relationship('Assignment', backref='teacher', lazy=True)
 
     def set_password(self, password):
@@ -127,6 +127,18 @@ def login():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
+        # Check if username already exists
+        existing_user = User.query.filter_by(username=form.username.data).first()
+        if existing_user:
+            flash('Username already exists. Please choose a different username.')
+            return render_template('register.html', form=form)
+
+        # Check if email already exists
+        existing_email = User.query.filter_by(email=form.email.data).first()
+        if existing_email:
+            flash('Email already exists. Please use a different email address.')
+            return render_template('register.html', form=form)
+
         user = User(
             username=form.username.data,
             email=form.email.data,
