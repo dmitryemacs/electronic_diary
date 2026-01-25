@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Grade Students - {{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3>
+                    <i class="fas fa-graduation-cap"></i> Grade Students for "{{ assignment.title }}"
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Class:</strong> {{ assignment.class_obj.name }} - {{ assignment.class_obj.subject }}</p>
+                        <p><strong>Due Date:</strong> {{ assignment.due_date.strftime('%Y-%m-%d') if assignment.due_date else 'No due date' }}</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="{{ url_for('view_class', class_id=assignment.class_id) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Class
+                        </a>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('grade_students', assignment_id=assignment.id) }}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Email</th>
+                                    <th>Current Grade</th>
+                                    <th>New Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ student.first_name }} {{ student.last_name }}</td>
+                                    <td>{{ student.email }}</td>
+                                    <td>
+                                        {% if student.id in grades %}
+                                            <span class="badge bg-success">{{ grades[student.id] }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No grade</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <input type="number" name="grade_{{ student.id }}"
+                                               class="form-control" style="width: 100px;"
+                                               value="{{ grades[student.id] if student.id in grades else '' }}"
+                                               min="0" max="100" placeholder="0-100">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Grades
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="jumbotron bg-light p-5 rounded-lg m-3">
+    <h1 class="display-4">Welcome to Electronic Diary</h1>
+    <p class="lead">A modern system for teachers and students to manage grades and assignments.</p>
+    <hr class="my-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-chalkboard-teacher"></i> For Teachers</h3>
+                    <p class="card-text">Create classes, assign homework, and manage student grades efficiently.</p>
+                    <ul>
+                        <li>Create and manage classes</li>
+                        <li>Assign and grade homework</li>
+                        <li>Track student progress</li>
+                        <li>Communicate with students</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="fas fa-graduation-cap"></i> For Students</h3>
+                    <p class="card-text">View your grades, homework assignments, and class information.</p>
+                    <ul>
+                        <li>View all your grades</li>
+                        <li>Check homework assignments</li>
+                        <li>See upcoming deadlines</li>
+                        <li>Track your academic progress</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-user-plus"></i> Register Now
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
