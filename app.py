@@ -74,6 +74,18 @@ class Grade(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message = db.Column(db.String(500), nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    notification_type = db.Column(db.String(50), nullable=False)  # e.g., 'assignment', 'grade', 'system'
+    reference_id = db.Column(db.Integer)  # ID of related object (assignment_id, grade_id, etc.)
+
+    # Relationship
+    user = db.relationship('User', backref='notifications')
+
 # Forms
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -98,6 +110,17 @@ class AssignmentForm(FlaskForm):
 class GradeForm(FlaskForm):
     value = StringField('Grade', validators=[DataRequired()])
     submit = SubmitField('Submit Grade')
+
+# Helper function to create notifications
+def create_notification(user_id, message, notification_type, reference_id=None):
+    notification = Notification(
+        user_id=user_id,
+        message=message,
+        notification_type=notification_type,
+        reference_id=reference_id
+    )
+    db.session.add(notification)
+    db.session.commit()
 
 # User Loader
 @login_manager.user_loader
@@ -250,6 +273,17 @@ def create_assignment(class_id):
         )
         db.session.add(assignment)
         db.session.commit()
+
+        # Notify all students in the class about the new assignment
+        student_classes = StudentClass.query.filter_by(class_id=class_id).all()
+        for student_class in student_classes:
+            create_notification(
+                student_class.student_id,
+                f'New assignment created: {form.title.data}',
+                'assignment',
+                assignment.id
+            )
+
         flash('Assignment created successfully!')
         return redirect(url_for('view_class', class_id=class_id))
 
@@ -289,6 +323,18 @@ def grade_students(assignment_id):
                     db.session.add(grade)
 
         db.session.commit()
+
+        # Notify students about their grades
+        for student in students:
+            grade_value = request.form.get(f'grade_{student.id}')
+            if grade_value:
+                create_notification(
+                    student.id,
+                    f'Your grade for assignment "{assignment.title}" has been updated to {grade_value}',
+                    'grade',
+                    assignment.id
+                )
+
         flash('Grades updated successfully!')
         return redirect(url_for('view_class', class_id=assignment.class_id))
 
@@ -333,6 +379,26 @@ def enroll_student(class_id):
             flash('Student not found')
 
     return redirect(url_for('view_class', class_id=class_id))
+
+@app.route('/notifications')
+@login_required
+def view_notifications():
+    # Get all notifications for current user, ordered by created_at descending
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+
+    # Mark notifications as read when viewed
+    unread_notifications = Notification.query.filter_by(user_id=current_user.id, is_read=False).all()
+    for notification in unread_notifications:
+        notification.is_read = True
+    db.session.commit()
+
+    return render_template('notifications.html', notifications=notifications)
+
+@app.route('/notifications/unread_count')
+@login_required
+def get_unread_notification_count():
+    unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    return {'unread_count': unread_count}
 
 if __name__ == '__main__':
     with app.app_context():

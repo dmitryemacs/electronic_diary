@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Notifications</h2>
+
+    <div class="list-group mt-4">
+        {% if notifications %}
+            {% for notification in notifications %}
+                <div class="list-group-item {% if not notification.is_read %}list-group-item-primary{% endif %}">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>{{ notification.message }}</strong>
+                            <div class="text-muted small">
+                                {{ notification.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                                {% if notification.notification_type == 'assignment' %}
+                                    <span class="badge bg-info">Assignment</span>
+                                {% elif notification.notification_type == 'grade' %}
+                                    <span class="badge bg-success">Grade</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">System</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if not notification.is_read %}
+                            <span class="badge bg-primary">New</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">No notifications found.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
