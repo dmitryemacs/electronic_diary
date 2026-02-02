@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Student Dashboard{% endblock %}
+{% block title %}Панель управления{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-12">
         <h1 class="mb-4">
-            <i class="fas fa-graduation-cap"></i> Student Dashboard
+            <i class="fas fa-graduation-cap"></i> Панель управления
         </h1>
 
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="card text-white bg-success mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">Your Classes</h5>
+                        <h5 class="card-title">Ваши классы</h5>
                         <p class="card-text h2">{{ classes|length }}</p>
                     </div>
                 </div>
@@ -21,7 +21,7 @@
             <div class="col-md-6">
                 <div class="card text-white bg-info mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">Your Grades</h5>
+                        <h5 class="card-title">Ваши оценки</h5>
                         <p class="card-text h2">{{ grades|length }}</p>
                     </div>
                 </div>
@@ -30,7 +30,7 @@
 
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h4>Your Classes</h4>
+                <h4>Ваши классы</h4>
             </div>
             <div class="card-body">
                 {% if classes %}
@@ -42,12 +42,12 @@
                                     <h5 class="card-title">{{ class_obj.name }}</h5>
                                     <h6 class="card-subtitle mb-2 text-muted">{{ class_obj.subject }}</h6>
                                     <p class="card-text">
-                                        Teacher: {{ class_obj.teacher.first_name }} {{ class_obj.teacher.last_name }}
+                                        Учитель: {{ class_obj.teacher.first_name }} {{ class_obj.teacher.last_name }}
                                     </p>
                                 </div>
                                 <div class="card-footer">
                                     <a href="{{ url_for('view_class', class_id=class_obj.id) }}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-eye"></i> View Class
+                                        <i class="fas fa-eye"></i> Просмотр класса
                                     </a>
                                 </div>
                             </div>
@@ -56,7 +56,7 @@
                     </div>
                 {% else %}
                     <div class="alert alert-info">
-                        You are not enrolled in any classes yet.
+                        Вы еще не записаны ни на один класс.
                     </div>
                 {% endif %}
             </div>
@@ -64,7 +64,7 @@
 
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h4>Your Grades</h4>
+                <h4>Ваши оценки</h4>
             </div>
             <div class="card-body">
                 {% if grades %}
@@ -72,10 +72,10 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Assignment</th>
-                                    <th>Class</th>
-                                    <th>Grade</th>
-                                    <th>Date</th>
+                                    <th>Задание</th>
+                                    <th>Класс</th>
+                                    <th>Оценка</th>
+                                    <th>Дата</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -94,7 +94,7 @@
                     </div>
                 {% else %}
                     <div class="alert alert-info">
-                        You don't have any grades yet.
+                        У вас пока нет оценок.
                     </div>
                 {% endif %}
             </div>

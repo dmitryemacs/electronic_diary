@@ -88,28 +88,28 @@ class Notification(db.Model):
 
 # Forms
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
+    username = StringField('Имя пользователя', validators=[DataRequired()])
+    password = PasswordField('Пароль', validators=[DataRequired()])
+    submit = SubmitField('Войти')
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=4, max=20)])
+    username = StringField('Имя пользователя', validators=[DataRequired(), Length(min=4, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    first_name = StringField('First Name', validators=[DataRequired()])
-    last_name = StringField('Last Name', validators=[DataRequired()])
-    role = SelectField('Role', choices=[('teacher', 'Teacher'), ('student', 'Student')], validators=[DataRequired()])
-    submit = SubmitField('Register')
+    password = PasswordField('Пароль', validators=[DataRequired(), Length(min=6)])
+    first_name = StringField('Имя', validators=[DataRequired()])
+    last_name = StringField('Фамилия', validators=[DataRequired()])
+    role = SelectField('Роль', choices=[('teacher', 'Учитель'), ('student', 'Студент')], validators=[DataRequired()])
+    submit = SubmitField('Зарегистрироваться')
 
 class AssignmentForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    description = StringField('Description')
-    due_date = StringField('Due Date (YYYY-MM-DD)')
-    submit = SubmitField('Create Assignment')
+    title = StringField('Название', validators=[DataRequired()])
+    description = StringField('Описание')
+    due_date = StringField('Срок выполнения (ГГГГ-ММ-ДД)')
+    submit = SubmitField('Создать задание')
 
 class GradeForm(FlaskForm):
-    value = StringField('Grade', validators=[DataRequired()])
-    submit = SubmitField('Submit Grade')
+    value = StringField('Оценка', validators=[DataRequired()])
+    submit = SubmitField('Сохранить')
 
 # Helper function to create notifications
 def create_notification(user_id, message, notification_type, reference_id=None):
@@ -143,7 +143,7 @@ def login():
                 return redirect(url_for('teacher_dashboard'))
             else:
                 return redirect(url_for('student_dashboard'))
-        flash('Invalid username or password')
+        flash('Неверное имя пользователя или пароль')
     return render_template('login.html', form=form)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -153,13 +153,13 @@ def register():
         # Check if username already exists
         existing_user = User.query.filter_by(username=form.username.data).first()
         if existing_user:
-            flash('Username already exists. Please choose a different username.')
+            flash('Имя пользователя уже существует. Пожалуйста, выберите другое имя пользователя.')
             return render_template('register.html', form=form)
 
         # Check if email already exists
         existing_email = User.query.filter_by(email=form.email.data).first()
         if existing_email:
-            flash('Email already exists. Please use a different email address.')
+            flash('Email уже существует. Пожалуйста, используйте другой адрес email.')
             return render_template('register.html', form=form)
 
         user = User(
@@ -172,7 +172,7 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Registration successful! Please login.')
+        flash('Регистрация успешна! Пожалуйста, войдите в систему.')
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
@@ -224,7 +224,7 @@ def create_class():
         )
         db.session.add(new_class)
         db.session.commit()
-        flash('Class created successfully!')
+        flash('Класс успешно создан!')
         return redirect(url_for('teacher_dashboard'))
 
     return render_template('create_class.html')
@@ -279,12 +279,12 @@ def create_assignment(class_id):
         for student_class in student_classes:
             create_notification(
                 student_class.student_id,
-                f'New assignment created: {form.title.data}',
+                f'Создано новое задание: {form.title.data}',
                 'assignment',
                 assignment.id
             )
 
-        flash('Assignment created successfully!')
+        flash('Задание успешно создано!')
         return redirect(url_for('view_class', class_id=class_id))
 
     return render_template('create_assignment.html', form=form, class_obj=class_obj)
@@ -330,12 +330,12 @@ def grade_students(assignment_id):
             if grade_value:
                 create_notification(
                     student.id,
-                    f'Your grade for assignment "{assignment.title}" has been updated to {grade_value}',
+                    f'Ваша оценка для задания "{assignment.title}" была обновлена на {grade_value}',
                     'grade',
                     assignment.id
                 )
 
-        flash('Grades updated successfully!')
+        flash('Оценки успешно обновлены!')
         return redirect(url_for('view_class', class_id=assignment.class_id))
 
     # Get existing grades
@@ -372,11 +372,11 @@ def enroll_student(class_id):
                 )
                 db.session.add(enrollment)
                 db.session.commit()
-                flash('Student enrolled successfully!')
+                flash('Студент успешно зачислен!')
             else:
-                flash('Student is already enrolled in this class')
+                flash('Студент уже записан в этот класс')
         else:
-            flash('Student not found')
+            flash('Студент не найден')
 
     return redirect(url_for('view_class', class_id=class_id))
 

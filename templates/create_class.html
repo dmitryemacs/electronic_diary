@@ -1,34 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}Create Class{% endblock %}
+{% block title %}Создание класса{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <h3><i class="fas fa-plus"></i> Create New Class</h3>
+                <h3><i class="fas fa-plus"></i> Создание нового класса</h3>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('create_class') }}">
                     <div class="mb-3">
-                        <label for="class_name" class="form-label">Class Name</label>
+                        <label for="class_name" class="form-label">Название класса</label>
                         <input type="text" class="form-control" id="class_name" name="class_name" required>
-                        <small class="form-text text-muted">e.g., Math 101, English Literature</small>
+                        <small class="form-text text-muted">например, Математика 101, Литература</small>
                     </div>
 
                     <div class="mb-3">
-                        <label for="subject" class="form-label">Subject</label>
+                        <label for="subject" class="form-label">Предмет</label>
                         <input type="text" class="form-control" id="subject" name="subject" required>
-                        <small class="form-text text-muted">e.g., Mathematics, English, Science</small>
+                        <small class="form-text text-muted">например, Математика, Русский язык, Физика</small>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-secondary me-md-2">
-                            <i class="fas fa-arrow-left"></i> Cancel
+                            <i class="fas fa-arrow-left"></i> Отмена
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Create Class
+                            <i class="fas fa-save"></i> Создать класс
                         </button>
                     </div>
                 </form>

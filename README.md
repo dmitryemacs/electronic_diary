@@ -1,199 +1,200 @@
-# Electronic Diary System
+# Система Электронный дневник
 
-A modern web application for teachers and students to manage grades and assignments.
+Современное веб-приложение для учителей и студентов по управлению оценками и заданиями.
 
-## Features
+## Возможности
 
-### For Teachers
-- Create and manage classes
-- Assign homework and projects
-- Grade student assignments
-- Track student progress
-- Enroll students in classes
+### Для учителей
+- Создание и управление классами
+- Назначение домашних заданий и проектов
+- Оценка назначений студентов
+- Отслеживание прогресса студентов
+- Зачисление студентов в классы
 
-### For Students
-- View all grades and assignments
-- See upcoming deadlines
-- Track academic progress
-- Access class information
+### Для студентов
+- Просмотр всех оценок и заданий
+- Просмотр предстоящих дедлайнов
+- Отслеживание академического прогресса
+- Доступ к информации по классам
 
-## Technologies Used
+## Используемые технологии
 
-- **Backend**: Python, Flask
-- **Database**: PostgreSQL
-- **Frontend**: HTML5, CSS3, Bootstrap 5
-- **Authentication**: Flask-Login
+- **Бэкенд**: Python, Flask
+- **База данных**: PostgreSQL
+- **Фронтенд**: HTML5, CSS3, Bootstrap 5
+- **Аутентификация**: Flask-Login
 - **ORM**: Flask-SQLAlchemy
-- **Deployment**: Docker, Docker Compose
+- **Деплой**: Docker, Docker Compose
 
-## Installation and Setup
+## Установка и настройка
 
-### Prerequisites
+### Требования
 - Docker
 - Docker Compose
 
-### Quick Start
+### Быстрый старт
 
-1. Clone the repository:
+1. Клонируйте репозиторий:
 ```bash
 git clone https://github.com/yourusername/electronic-diary.git
 cd electronic-diary
 ```
 
-2. Build and start the containers:
+2. Соберите и запустите контейнеры:
 ```bash
 docker compose up --build
 ```
 
-3. Access the application at:
+3. Откройте приложение по адресу:
 ```
 http://localhost:5000
 ```
 
-### Manual Setup (without Docker)
+### Ручная установка (без Docker)
 
-1. Install dependencies:
+1. Установите зависимости:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Set up environment variables (create `.env` file):
+2. Настройте переменные окружения (создайте файл `.env`):
 ```
 DATABASE_URL=postgresql://diary_user:diary_password@localhost:5432/diarydb
 SECRET_KEY=your-secret-key-change-in-production
 ```
 
-3. Run the application:
+3. Запустите приложение:
 ```bash
 python app.py
 ```
 
-## Usage
+## Использование
 
-### Registration
-1. Go to the registration page
-2. Choose your role (Teacher or Student)
-3. Fill in your details and create an account
+### Регистрация
+1. Перейдите на страницу регистрации
+2. Выберите роль (Учитель или Студент)
+3. Заполните данные и создайте аккаунт
 
-### For Teachers
-1. Login to your account
-2. Create classes for different subjects
-3. Add assignments with due dates
-4. Enroll students in your classes
-5. Grade student assignments
+### Для учителей
+1. Войдите в систему
+2. Создавайте классы для разных предметов
+3. Добавляйте задания с указанием сроков
+4. Зачисляйте студентов в классы
+5. Оценивайте задания студентов
 
-### For Students
-1. Login to your account
-2. View your enrolled classes
-3. Check your grades and assignments
-4. See upcoming deadlines
+### Для студентов
+1. Войдите в систему
+2. Просматривайте свои классы
+3. Проверяйте оценки и задания
+4. Следите за предстоящими дедлайнами
 
-## Project Structure
+## Структура проекта
 
 ```
 electronic-diary/
-├── app.py                  # Main Flask application
-├── requirements.txt        # Python dependencies
-├── .env                    # Environment variables
-├── Dockerfile              # Docker configuration
-├── docker-compose.yml      # Docker Compose configuration
+├── app.py                  # Основное Flask приложение
+├── requirements.txt        # Зависимости Python
+├── .env                    # Переменные окружения
+├── Dockerfile              # Конфигурация Docker
+├── docker-compose.yml      # Docker Compose конфигурация
 ├── static/
 │   ├── css/
-│   │   └── style.css       # Custom CSS styles
-│   └── uploads/            # File uploads directory
-├── templates/
-│   ├── base.html           # Base template
-│   ├── index.html          # Home page
-│   ├── login.html          # Login page
-│   ├── register.html       # Registration page
-│   ├── teacher_dashboard.html  # Teacher dashboard
-│   ├── student_dashboard.html  # Student dashboard
-│   ├── create_class.html   # Create class form
-│   ├── view_class.html     # View class details
-│   ├── create_assignment.html  # Create assignment form
-│   └── grade_students.html # Grade students interface
-└── README.md               # This file
+│   │   └── style.css       # Пользовательские CSS стили
+│   └── uploads/            # Директория для загрузок
+└── templates/
+    ├── base.html           # Базовый шаблон
+    ├── index.html          # Главная страница
+    ├── login.html          # Страница входа
+    ├── register.html       # Страница регистрации
+    ├── teacher_dashboard.html  # Панель управления учителя
+    ├── student_dashboard.html  # Панель управления студента
+    ├── create_class.html   # Форма создания класса
+    ├── view_class.html     # Просмотр деталей класса
+    ├── create_assignment.html  # Форма создания задания
+    ├── grade_students.html # Интерфейс оценки студентов
+    └── notifications.html  # Страница уведомлений
+└── README.md               # Этот файл
 ```
 
-## Database Schema
+## Схема базы данных
 
-The application uses the following database models:
+Приложение использует следующие модели базы данных:
 
-- **User**: Stores user information (teachers and students)
-- **Class**: Represents classes/subjects
-- **StudentClass**: Many-to-many relationship between students and classes
-- **Assignment**: Homework and projects assigned to classes
-- **Grade**: Student grades for assignments
+- **User**: Хранит информацию о пользователях (учителях и студентах)
+- **Class**: Представляет классы/предметы
+- **StudentClass**: Связь "многие-ко-многим" между студентами и классами
+- **Assignment**: Домашние задания и проекты, назначаемые классам
+- **Grade**: Оценки студентов за задания
 
-## Configuration
+## Конфигурация
 
-### Environment Variables
+### Переменные окружения
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection URL | `postgresql://diary_user:diary_password@db:5432/diarydb` |
-| `SECRET_KEY` | Flask secret key for sessions | `your-secret-key-change-in-production` |
-| `FLASK_APP` | Flask application entry point | `app.py` |
+| Переменная | Описание | По умолчанию |
+|------------|----------|--------------|
+| `DATABASE_URL` | URL подключения PostgreSQL | `postgresql://diary_user:diary_password@db:5432/diarydb` |
+| `SECRET_KEY` | Секретный ключ Flask для сессий | `your-secret-key-change-in-production` |
+| `FLASK_APP` | Точка входа Flask приложения | `app.py` |
 
-### Security
+### Безопасность
 
-- Change the `SECRET_KEY` in production
-- Use strong passwords for database credentials
-- Consider using HTTPS in production
+- Измените `SECRET_KEY` в продакшене
+- Используйте надежные пароли для учетных данных базы данных
+- Рассмотрите возможность использования HTTPS в продакшене
 
-## Development
+## Разработка
 
-### Running Tests
+### Запуск в режиме разработки
 
 ```bash
-# Run the application in development mode
+# Запуск приложения в режиме отладки
 python app.py
 ```
 
-### Database Migrations
+### Миграции базы данных
 
-The application automatically creates tables on startup. For production, consider using Flask-Migrate.
+Приложение автоматически создает таблицы при запуске. Для продакшена рекомендуется использовать Flask-Migrate.
 
-## Deployment
+## Деплой
 
-### Production with Docker
+### Продакшн с Docker
 
 ```bash
-# Build and start in detached mode
+# Сборка и запуск в фоновом режиме
 docker compose up --build -d
 
-# Stop the containers
+# Остановка контейнеров
 docker compose down
 ```
 
-### Scaling
+### Масштабирование
 
-The application can be scaled by:
-1. Increasing Gunicorn workers
-2. Using a production WSGI server
-3. Adding a reverse proxy (Nginx)
-4. Implementing caching
+Приложение можно масштабировать путем:
+1. Увеличения количества Gunicorn workers
+2. Использования production WSGI сервера
+3. Добавления обратного прокси (Nginx)
+4. Реализации кэширования
 
-## Contributing
+## Внесение вклада
 
-Contributions are welcome! Please follow these steps:
+Вклад приветствуется! Пожалуйста, следуйте этим шагам:
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to your branch
-5. Create a pull request
+1. Форкните репозиторий
+2. Создайте ветку features
+3. Зафиксируйте свои изменения
+4. Отправьте в свою ветку
+5. Создайте Pull Request
 
-## License
+## Лицензия
 
-This project is open source and available under the MIT License.
+Этот проект с открытым исходным кодом и доступен под лицензией MIT.
 
-## Support
+## Поддержка
 
-For issues and questions, please contact:
+По вопросам и проблемам обращайтесь:
 - Email: support@diary.com
 - GitHub Issues: [https://github.com/yourusername/electronic-diary/issues](https://github.com/yourusername/electronic-diary/issues)
 
 ---
 
-**Electronic Diary System** - Modern education management solution
+**Система Электронный дневник** - Современное решение для управления образованием

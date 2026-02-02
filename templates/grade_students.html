@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Grade Students - {{ assignment.title }}{% endblock %}
+{% block title %}Оценка студентов - {{ assignment.title }}{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -8,18 +8,18 @@
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h3>
-                    <i class="fas fa-graduation-cap"></i> Grade Students for "{{ assignment.title }}"
+                    <i class="fas fa-graduation-cap"></i> Оценка студентов для "{{ assignment.title }}"
                 </h3>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <p><strong>Class:</strong> {{ assignment.class_obj.name }} - {{ assignment.class_obj.subject }}</p>
-                        <p><strong>Due Date:</strong> {{ assignment.due_date.strftime('%Y-%m-%d') if assignment.due_date else 'No due date' }}</p>
+                        <p><strong>Класс:</strong> {{ assignment.class_obj.name }} - {{ assignment.class_obj.subject }}</p>
+                        <p><strong>Срок выполнения:</strong> {{ assignment.due_date.strftime('%Y-%m-%d') if assignment.due_date else 'Нет срока' }}</p>
                     </div>
                     <div class="col-md-6 text-end">
                         <a href="{{ url_for('view_class', class_id=assignment.class_id) }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to Class
+                            <i class="fas fa-arrow-left"></i> Назад к классу
                         </a>
                     </div>
                 </div>
@@ -29,10 +29,10 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Student</th>
+                                    <th>Студент</th>
                                     <th>Email</th>
-                                    <th>Current Grade</th>
-                                    <th>New Grade</th>
+                                    <th>Текущая оценка</th>
+                                    <th>Новая оценка</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -44,7 +44,7 @@
                                         {% if student.id in grades %}
                                             <span class="badge bg-success">{{ grades[student.id] }}</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">No grade</span>
+                                            <span class="badge bg-secondary">Нет оценки</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -61,7 +61,7 @@
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Grades
+                            <i class="fas fa-save"></i> Сохранить оценки
                         </button>
                     </div>
                 </form>

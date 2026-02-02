@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electronic Diary - {% block title %}{% endblock %}</title>
+    <title>Электронный дневник - {% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,7 +12,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('home') }}">
-                <i class="fas fa-book"></i> Electronic Diary
+                <i class="fas fa-book"></i> Электронный дневник
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -22,14 +22,14 @@
                     {% if current_user.is_authenticated %}
                         {% if current_user.role == 'teacher' %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('teacher_dashboard') }}">Dashboard</a>
+                                <a class="nav-link" href="{{ url_for('teacher_dashboard') }}">Панель управления</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('create_class') }}">Create Class</a>
+                                <a class="nav-link" href="{{ url_for('create_class') }}">Создать класс</a>
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('student_dashboard') }}">Dashboard</a>
+                                <a class="nav-link" href="{{ url_for('student_dashboard') }}">Панель управления</a>
                             </li>
                         {% endif %}
                     {% endif %}
@@ -46,18 +46,18 @@
                         </li>
                         <li class="nav-item">
                             <span class="navbar-text me-3">
-                                Welcome, {{ current_user.first_name }} {{ current_user.last_name }}
+                                Добро пожаловать, {{ current_user.first_name }} {{ current_user.last_name }}
                             </span>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                            <a class="nav-link" href="{{ url_for('logout') }}">Выйти</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                            <a class="nav-link" href="{{ url_for('login') }}">Войти</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                            <a class="nav-link" href="{{ url_for('register') }}">Регистрация</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -84,23 +84,23 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Electronic Diary System</h5>
-                    <p>A modern solution for teachers and students to manage grades and assignments.</p>
+                    <h5>Система Электронный дневник</h5>
+                    <p>Современное решение для учителей и студентов по управлению оценками и заданиями.</p>
                 </div>
                 <div class="col-md-3">
-                    <h5>Quick Links</h5>
+                    <h5>Быстрые ссылки</h5>
                     <ul class="list-unstyled">
-                        <li><a href="{{ url_for('home') }}">Home</a></li>
+                        <li><a href="{{ url_for('home') }}">Главная</a></li>
                         {% if current_user.is_authenticated %}
-                            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                            <li><a href="{{ url_for('logout') }}">Выйти</a></li>
                         {% else %}
-                            <li><a href="{{ url_for('login') }}">Login</a></li>
-                            <li><a href="{{ url_for('register') }}">Register</a></li>
+                            <li><a href="{{ url_for('login') }}">Войти</a></li>
+                            <li><a href="{{ url_for('register') }}">Регистрация</a></li>
                         {% endif %}
                     </ul>
                 </div>
                 <div class="col-md-3">
-                    <h5>Contact</h5>
+                    <h5>Контакты</h5>
                     <address>
                         <i class="fas fa-envelope"></i> support@diary.com<br>
                         <i class="fas fa-phone"></i> +123 456 7890
@@ -109,7 +109,7 @@
             </div>
             <hr>
             <div class="text-center">
-                <p>&copy; 2023 Electronic Diary. All rights reserved.</p>
+                <p>&copy; 2023 Электронный дневник. Все права защищены.</p>
             </div>
         </div>
     </footer>
