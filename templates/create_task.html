@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Создание задачи{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>
+                    <i class="fas fa-plus"></i> Создание задачи для {{ program.name }}
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('create_task', program_id=program.id) }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.title.label(class="form-label") }}
+                        {{ form.title(class="form-control") }}
+                        {% if form.title.errors %}
+                            <div class="invalid-feedback d-block">{{ form.title.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows=5) }}
+                        <small class="form-text text-muted">Описание и инструкции для участников</small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.category.label(class="form-label") }}
+                        {{ form.category(class="form-select") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.due_date.label(class="form-label") }}
+                        {{ form.due_date(class="form-control", placeholder="ГГГГ-ММ-ДД") }}
+                        <small class="form-text text-muted">Срок выполнения задачи (дата в формате ГГГГ-ММ-ДД)</small>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('view_program', program_id=program.id) }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Создать задачу
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Панель управления участника{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-graduation-cap"></i> Панель управления участника
+        </h1>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Ваши программы</h5>
+                        <p class="card-text h2">{{ programs|length }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-white bg-info mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Ваши оценки</h5>
+                        <p class="card-text h2">{{ grades|length }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4>Ваши программы</h4>
+            </div>
+            <div class="card-body">
+                {% if programs %}
+                    <div class="row">
+                        {% for program in programs %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ program.name }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ program.subject }}</h6>
+                                    <p class="card-text">
+                                        Организатор: {{ program.organizer.first_name }} {{ program.organizer.last_name }}
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="{{ url_for('view_program', program_id=program.id) }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye"></i> Просмотр программы
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        Вы еще не записаны ни на одну программу.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4>Ваши оценки</h4>
+            </div>
+            <div class="card-body">
+                {% if grades %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Задача</th>
+                                    <th>Программа</th>
+                                    <th>Оценка</th>
+                                    <th>Дата</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grade in grades %}
+                                <tr>
+                                    <td>{{ grade.task.title }}</td>
+                                    <td>{{ grade.task.program.name }}</td>
+                                    <td>
+                                        <span class="badge bg-success">{{ grade.value }}</span>
+                                    </td>
+                                    <td>{{ grade.date.strftime('%Y-%m-%d') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        У вас пока нет оценок.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

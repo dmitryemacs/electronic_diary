@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}{{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Task Details -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3>{{ task.title }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Категория:</strong> 
+                                {% if task.category == 'homework' %}
+                                    <span class="badge bg-info">Домашнее задание</span>
+                                {% elif task.category == 'test' %}
+                                    <span class="badge bg-warning">Тест</span>
+                                {% elif task.category == 'project' %}
+                                    <span class="badge bg-success">Проект</span>
+                                {% elif task.category == 'quiz' %}
+                                    <span class="badge bg-secondary">Викторина</span>
+                                {% elif task.category == 'exam' %}
+                                    <span class="badge bg-danger">Экзамен</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Срок выполнения:</strong> 
+                                {% if task.due_date %}
+                                    {{ task.due_date.strftime('%d.%m.%Y %H:%M') }}
+                                    {% if task.due_date < now %}
+                                        <span class="badge bg-danger ms-2">Просроченно</span>
+                                    {% endif %}
+                                {% else %}
+                                    Не указан
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5>Описание:</h5>
+                        <p>{{ task.description }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Participant Submission Section -->
+            {% if current_user.role == 'participant' %}
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4>Ваш ответ</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if submission and submission.is_submitted %}
+                            <div class="alert alert-success mb-3">
+                                <i class="fas fa-check-circle"></i>
+                                <strong>Статус:</strong> 
+                                {% if submission.is_late %}
+                                    <span class="badge bg-warning">Отправлено с опозданием</span>
+                                {% else %}
+                                    <span class="badge bg-success">Отправлено вовремя</span>
+                                {% endif %}
+                                <br>
+                                <strong>Дата отправки:</strong> {{ submission.submitted_at.strftime('%d.%m.%Y %H:%M') }}
+                            </div>
+                            
+                            {% if submission.submission_text %}
+                                <div class="mb-3">
+                                    <h6>Текст ответа:</h6>
+                                    <div class="bg-light p-3 rounded">
+                                        {{ submission.submission_text }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% if submission.file_path %}
+                                <div class="mb-3">
+                                    <h6>Загруженный файл:</h6>
+                                    <a href="{{ url_for('static', filename=submission.file_path) }}" class="btn btn-sm btn-primary" download>
+                                        <i class="fas fa-download"></i> Скачать файл
+                                    </a>
+                                </div>
+                            {% endif %}
+                            
+                            <hr>
+                            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#resubmitModal">
+                                <i class="fas fa-edit"></i> Переотправить
+                            </button>
+                        {% else %}
+                            <p class="text-muted">Вы еще не отправили ответ на эту задачу.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Feedback Section -->
+                {% if feedback %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h4>Отзыв организатора</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Оценка:</strong> 
+                                <div class="rating">
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= feedback.rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-muted"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <h6>Комментарий:</h6>
+                                <p>{{ feedback.feedback_text }}</p>
+                            </div>
+                            <small class="text-muted">Дата: {{ feedback.created_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Submission Form -->
+                {% if not submission or not submission.is_submitted %}
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h4>Отправить ответ</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('submit_task', task_id=task.id) }}" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="submission_text" class="form-label">Текст ответа</label>
+                                    <textarea class="form-control" id="submission_text" name="submission_text" rows="5"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="submission_file" class="form-label">Загрузить файл (опционально)</label>
+                                    <input type="file" class="form-control" id="submission_file" name="submission_file">
+                                    <small class="text-muted">Допустимые форматы: PDF, DOC, DOCX, TXT, JPG, PNG, ZIP (максимум 50MB)</small>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Отправить
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Resubmit Modal -->
+                {% if submission and submission.is_submitted %}
+                    <div class="modal fade" id="resubmitModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Переотправить ответ</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="POST" action="{{ url_for('submit_task', task_id=task.id) }}" enctype="multipart/form-data">
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="resubmit_text" class="form-label">Текст ответа</label>
+                                            <textarea class="form-control" id="resubmit_text" name="submission_text" rows="5">{{ submission.submission_text }}</textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="resubmit_file" class="form-label">Загрузить файл (опционально)</label>
+                                            <input type="file" class="form-control" id="resubmit_file" name="submission_file">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                        <button type="submit" class="btn btn-primary">Переотправить</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <!-- Organizer View -->
+                <a href="{{ url_for('view_task_submissions', task_id=task.id) }}" class="btn btn-primary">
+                    <i class="fas fa-list"></i> Посмотреть ответы участников
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

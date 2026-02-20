@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Оценка участников - {{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3>
+                    <i class="fas fa-graduation-cap"></i> Оценка участников для "{{ task.title }}"
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Программа:</strong> {{ task.program.name }} - {{ task.program.subject }}</p>
+                        <p><strong>Срок выполнения:</strong> {{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'Нет срока' }}</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="{{ url_for('view_program', program_id=task.program_id) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Назад к программе
+                        </a>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('grade_participants', task_id=task.id) }}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Участник</th>
+                                    <th>Email</th>
+                                    <th>Текущая оценка</th>
+                                    <th>Новая оценка</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for participant in participants %}
+                                <tr>
+                                    <td>{{ participant.first_name }} {{ participant.last_name }}</td>
+                                    <td>{{ participant.email }}</td>
+                                    <td>
+                                        {% if participant.id in grades %}
+                                            <span class="badge bg-success">{{ grades[participant.id] }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Нет оценки</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <input type="number" name="grade_{{ participant.id }}"
+                                               class="form-control" style="width: 100px;"
+                                               value="{{ grades[participant.id] if participant.id in grades else '' }}"
+                                               min="0" max="100" placeholder="0-100">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Сохранить оценки
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

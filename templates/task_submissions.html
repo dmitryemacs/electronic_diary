@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Ответы участников на {{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Task Info -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3>Ответы участников на задачу: {{ task.title }}</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Категория:</strong> 
+                        {% if task.category == 'homework' %}
+                            <span class="badge bg-info">Домашнее задание</span>
+                        {% elif task.category == 'test' %}
+                            <span class="badge bg-warning">Тест</span>
+                        {% elif task.category == 'project' %}
+                            <span class="badge bg-success">Проект</span>
+                        {% elif task.category == 'quiz' %}
+                            <span class="badge bg-secondary">Викторина</span>
+                        {% elif task.category == 'exam' %}
+                            <span class="badge bg-danger">Экзамен</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Срок выполнения:</strong> 
+                        {% if task.due_date %}
+                            {{ task.due_date.strftime('%d.%m.%Y %H:%M') }}
+                        {% else %}
+                            Не указан
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Submissions Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Список отправок</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Участник</th>
+                                <th>Статус</th>
+                                <th>Дата отправки</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set submitted_participants = {} %}
+                            {% for submission in submissions %}
+                                {% set _ = submitted_participants.update({submission.participant_id: submission}) %}
+                                <tr>
+                                    <td>{{ submission.participant.first_name }} {{ submission.participant.last_name }}</td>
+                                    <td>
+                                        {% if submission.is_submitted %}
+                                            {% if submission.is_late %}
+                                                <span class="badge bg-warning">Опаздано</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Отправлено</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary">Не отправлено</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if submission.submitted_at %}
+                                            {{ submission.submitted_at.strftime('%d.%m.%Y %H:%M') }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if submission.is_submitted %}
+                                            <a href="{{ url_for('add_task_feedback', task_id=task.id, participant_id=submission.participant_id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-comment"></i> Отзыв
+                                            </a>
+                                            {% if submission.file_path %}
+                                                <a href="{{ url_for('static', filename=submission.file_path) }}" class="btn btn-sm btn-info" download>
+                                                    <i class="fas fa-download"></i> Файл
+                                                </a>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">Нет ответа</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+                            <!-- Participants without submissions -->
+                            {% for participant_id, participant in all_participants.items() %}
+                                {% if participant_id not in submitted_participants %}
+                                    <tr class="table-danger">
+                                        <td>{{ participant.first_name }} {{ participant.last_name }}</td>
+                                        <td><span class="badge bg-danger">Не отправлено</span></td>
+                                        <td>-</td>
+                                        <td><span class="text-muted">Нет ответа</span></td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Всего участников</h5>
+                            <h2 class="text-primary">{{ all_participants|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Отправили ответ</h5>
+                            <h2 class="text-success">{{ submissions|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Не отправили</h5>
+                            <h2 class="text-danger">{{ all_participants|length - submissions|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{{ url_for('view_program', program_id=task.program_id) }}" class="btn btn-secondary mt-4">
+                <i class="fas fa-arrow-left"></i> Вернуться к программе
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
