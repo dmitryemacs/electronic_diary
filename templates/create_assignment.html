@@ -18,18 +18,26 @@
                     <div class="mb-3">
                         {{ form.title.label(class="form-label") }}
                         {{ form.title(class="form-control") }}
+                        {% if form.title.errors %}
+                            <div class="invalid-feedback d-block">{{ form.title.errors[0] }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="mb-3">
                         {{ form.description.label(class="form-label") }}
-                        {{ form.description(class="form-control") }}
-                        <small class="form-text text-muted">Необязательное описание задания</small>
+                        {{ form.description(class="form-control", rows=5) }}
+                        <small class="form-text text-muted">Описание и инструкции для студентов</small>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.category.label(class="form-label") }}
+                        {{ form.category(class="form-select") }}
                     </div>
 
                     <div class="mb-3">
                         {{ form.due_date.label(class="form-label") }}
                         {{ form.due_date(class="form-control", placeholder="ГГГГ-ММ-ДД") }}
-                        <small class="form-text text-muted">Необязательный срок выполнения задания</small>
+                        <small class="form-text text-muted">Срок выполнения задания (дата и время в формате ГГГГ-ММ-ДД)</small>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">

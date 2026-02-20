@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Электронный дневник - {% block title %}{% endblock %}</title>
+    <title>Образовательный портал учреждения - {% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,7 +12,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('home') }}">
-                <i class="fas fa-book"></i> Электронный дневник
+                <i class="fas fa-book"></i> Образовательный портал учреждения
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -20,16 +20,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     {% if current_user.is_authenticated %}
-                        {% if current_user.role == 'teacher' %}
+                        {% if current_user.role == 'organizer' %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('teacher_dashboard') }}">Панель управления</a>
+                                <a class="nav-link" href="{{ url_for('organizer_dashboard') }}">Панель управления</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('create_class') }}">Создать класс</a>
+                                <a class="nav-link" href="{{ url_for('create_program') }}">Создать программу</a>
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('student_dashboard') }}">Панель управления</a>
+                                <a class="nav-link" href="{{ url_for('participant_dashboard') }}">Панель управления</a>
                             </li>
                         {% endif %}
                     {% endif %}
@@ -84,7 +84,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Система Электронный дневник</h5>
+                    <h5>Система Образовательный портал учреждения</h5>
                     <p>Современное решение для учителей и студентов по управлению оценками и заданиями.</p>
                 </div>
                 <div class="col-md-3">
@@ -109,7 +109,7 @@
             </div>
             <hr>
             <div class="text-center">
-                <p>&copy; 2023 Электронный дневник. Все права защищены.</p>
+                <p>&copy; 2023 Образовательный портал учреждения. Все права защищены.</p>
             </div>
         </div>
     </footer>
