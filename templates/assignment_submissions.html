@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Ответы студентов на {{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Assignment Info -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3>Ответы студентов на задание: {{ assignment.title }}</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Категория:</strong> 
+                        {% if assignment.category == 'homework' %}
+                            <span class="badge bg-info">Домашнее задание</span>
+                        {% elif assignment.category == 'test' %}
+                            <span class="badge bg-warning">Тест</span>
+                        {% elif assignment.category == 'project' %}
+                            <span class="badge bg-success">Проект</span>
+                        {% elif assignment.category == 'quiz' %}
+                            <span class="badge bg-secondary">Викторина</span>
+                        {% elif assignment.category == 'exam' %}
+                            <span class="badge bg-danger">Экзамен</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Срок выполнения:</strong> 
+                        {% if assignment.due_date %}
+                            {{ assignment.due_date.strftime('%d.%m.%Y %H:%M') }}
+                        {% else %}
+                            Не указан
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Submissions Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Список отправок</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Студент</th>
+                                <th>Статус</th>
+                                <th>Дата отправки</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set submitted_students = {} %}
+                            {% for submission in submissions %}
+                                {% set _ = submitted_students.update({submission.student_id: submission}) %}
+                                <tr>
+                                    <td>{{ submission.student.first_name }} {{ submission.student.last_name }}</td>
+                                    <td>
+                                        {% if submission.is_submitted %}
+                                            {% if submission.is_late %}
+                                                <span class="badge bg-warning">Опаздано</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Отправлено</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary">Не отправлено</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if submission.submitted_at %}
+                                            {{ submission.submitted_at.strftime('%d.%m.%Y %H:%M') }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if submission.is_submitted %}
+                                            <a href="{{ url_for('add_feedback', assignment_id=assignment.id, student_id=submission.student_id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-comment"></i> Отзыв
+                                            </a>
+                                            {% if submission.file_path %}
+                                                <a href="{{ url_for('static', filename=submission.file_path) }}" class="btn btn-sm btn-info" download>
+                                                    <i class="fas fa-download"></i> Файл
+                                                </a>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">Нет ответа</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+                            <!-- Students without submissions -->
+                            {% for student_id, student in all_students.items() %}
+                                {% if student_id not in submitted_students %}
+                                    <tr class="table-danger">
+                                        <td>{{ student.first_name }} {{ student.last_name }}</td>
+                                        <td><span class="badge bg-danger">Не отправлено</span></td>
+                                        <td>-</td>
+                                        <td><span class="text-muted">Нет ответа</span></td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Всего студентов</h5>
+                            <h2 class="text-primary">{{ all_students|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Отправили ответ</h5>
+                            <h2 class="text-success">{{ submissions|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Не отправили</h5>
+                            <h2 class="text-danger">{{ all_students|length - submissions|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{{ url_for('view_class', class_id=assignment.class_id) }}" class="btn btn-secondary mt-4">
+                <i class="fas fa-arrow-left"></i> Вернуться к классу
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

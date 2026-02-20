@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Отзыв на задание для {{ student.first_name }} {{ student.last_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10">
+            <!-- Student and Assignment Info -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3>Отзыв на задание</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Студент:</strong> {{ student.first_name }} {{ student.last_name }}</p>
+                            <p><strong>Email:</strong> {{ student.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Задание:</strong> {{ assignment.title }}</p>
+                            <p><strong>Категория:</strong> 
+                                {% if assignment.category == 'homework' %}
+                                    <span class="badge bg-info">Домашнее задание</span>
+                                {% elif assignment.category == 'test' %}
+                                    <span class="badge bg-warning">Тест</span>
+                                {% elif assignment.category == 'project' %}
+                                    <span class="badge bg-success">Проект</span>
+                                {% elif assignment.category == 'quiz' %}
+                                    <span class="badge bg-secondary">Викторина</span>
+                                {% elif assignment.category == 'exam' %}
+                                    <span class="badge bg-danger">Экзамен</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Submission Review -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5>Ответ студента</h5>
+                </div>
+                <div class="card-body">
+                    {% if submission.submission_text %}
+                        <div class="mb-3">
+                            <h6>Текст ответа:</h6>
+                            <div class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">
+                                {{ submission.submission_text }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if submission.file_path %}
+                        <div class="mb-3">
+                            <h6>Загруженный файл:</h6>
+                            <a href="{{ url_for('static', filename=submission.file_path) }}" class="btn btn-sm btn-outline-primary" download>
+                                <i class="fas fa-download"></i> Скачать файл
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <div class="text-muted small">
+                        <strong>Дата отправки:</strong> {{ submission.submitted_at.strftime('%d.%m.%Y %H:%M') }}
+                        {% if submission.is_late %}
+                            <span class="badge bg-warning ms-2">Опаздано</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Form -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5>Оставить отзыв</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <!-- Rating Stars -->
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Оценка (1-5 звезд)</strong></label>
+                            <div class="rating-input" id="ratingInput">
+                                {% for i in range(1, 6) %}
+                                    <label class="star-label">
+                                        <input type="radio" name="rating" value="{{ i }}" class="star-radio" {% if loop.first %}checked{% endif %}>
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            {% if form.rating.errors %}
+                                <div class="invalid-feedback d-block">{{ form.rating.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Feedback Text -->
+                        <div class="mb-3">
+                            <label for="feedback" class="form-label"><strong>Комментарий обратной связи</strong></label>
+                            {{ form.feedback_text(class="form-control", rows=6, id="feedback") }}
+                            {% if form.feedback_text.errors %}
+                                <div class="invalid-feedback d-block">{{ form.feedback_text.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            {{ form.submit(class="btn btn-success") }}
+                            <a href="{{ url_for('view_submissions', assignment_id=assignment.id) }}" class="btn btn-secondary">
+                                Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <a href="{{ url_for('view_submissions', assignment_id=assignment.id) }}" class="btn btn-secondary mt-4">
+                <i class="fas fa-arrow-left"></i> Вернуться к списку ответов
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rating-input {
+        font-size: 30px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .star-label {
+        cursor: pointer;
+        color: #ddd;
+        transition: color 0.2s;
+    }
+
+    .star-radio {
+        display: none;
+    }
+
+    .star-label:hover,
+    .star-label:hover ~ .star-label,
+    .star-radio:checked ~ .star-label {
+        color: #ffc107;
+    }
+
+    .star-label:hover {
+        color: #ffc107;
+    }
+</style>
+
+<script>
+    // Enhance star rating interaction
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.star-label');
+        const radios = document.querySelectorAll('.star-radio');
+
+        stars.forEach((star, index) => {
+            star.addEventListener('click', function() {
+                radios[index].checked = true;
+            });
+        });
+
+        // Set initial state
+        radios.forEach((radio, index) => {
+            if (radio.checked) {
+                updateStars(index);
+            }
+        });
+
+        function updateStars(checkedIndex) {
+            stars.forEach((star, index) => {
+                if (index <= checkedIndex) {
+                    star.style.color = '#ffc107';
+                } else {
+                    star.style.color = '#ddd';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
