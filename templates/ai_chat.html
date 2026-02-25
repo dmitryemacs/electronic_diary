@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Чат{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">AI Чат (OpenRouter)</h5>
+    <div id="chat-window" style="height:400px; overflow:auto; border:1px solid #ddd; padding:10px; margin-bottom:10px; background-color:#f9f9f9;"></div>
+
+    <div class="mb-3">
+      <textarea id="user-message" class="form-control" rows="3" placeholder="Введите сообщение для AI... (макс. 2000 символов)" maxlength="2000"></textarea>
+      <small class="text-muted">
+        <span id="char-count">0</span> / 2000 символов
+      </small>
+    </div>
+    <button id="send-btn" class="btn btn-primary">Отправить</button>
+    <span id="loading-spinner" style="display:none; margin-left:10px;">
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Ожидание...
+    </span>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const msgEl = document.getElementById('user-message');
+const sendBtn = document.getElementById('send-btn');
+const charCount = document.getElementById('char-count');
+const loadingSpinner = document.getElementById('loading-spinner');
+
+// Update character count
+msgEl.addEventListener('input', function() {
+  charCount.textContent = this.value.length;
+});
+
+// Send message on Enter (Ctrl+Enter for multiline)
+msgEl.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    sendBtn.click();
+  }
+});
+
+sendBtn.addEventListener('click', async function() {
+  const message = msgEl.value.trim();
+  if (!message) {
+    appendMessage('Система', 'Пожалуйста, введите сообщение', 'warning');
+    return;
+  }
+
+  appendMessage('Вы', message, 'user');
+  msgEl.value = '';
+  charCount.textContent = '0';
+  
+  sendBtn.disabled = true;
+  loadingSpinner.style.display = 'inline';
+
+  try {
+    const res = await fetch('{{ url_for("ai_chat") }}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await res.json();
+    
+    if (res.ok && data.reply) {
+      appendMessage('AI', data.reply, 'assistant');
+    } else {
+      let errMsg = data.error || 'Неизвестная ошибка';
+      if (data.hint) {
+        errMsg += '\n\n💡 ' + data.hint;
+      }
+      appendMessage('Система', errMsg, 'error');
+    }
+  } catch (err) {
+    appendMessage('Система', 'Ошибка сети: ' + err.message, 'error');
+  } finally {
+    sendBtn.disabled = false;
+    loadingSpinner.style.display = 'none';
+    msgEl.focus();
+  }
+});
+
+function appendMessage(who, text, type = 'normal') {
+  const win = document.getElementById('chat-window');
+  const el = document.createElement('div');
+  el.style.marginBottom = '10px';
+  el.style.padding = '8px';
+  el.style.borderRadius = '4px';
+  
+  // Style based on message type
+  if (type === 'user') {
+    el.style.backgroundColor = '#e3f2fd';
+    el.style.borderLeft = '4px solid #2196F3';
+  } else if (type === 'assistant') {
+    el.style.backgroundColor = '#f5f5f5';
+    el.style.borderLeft = '4px solid #4CAF50';
+  } else if (type === 'error') {
+    el.style.backgroundColor = '#ffebee';
+    el.style.borderLeft = '4px solid #f44336';
+  } else if (type === 'warning') {
+    el.style.backgroundColor = '#fff3e0';
+    el.style.borderLeft = '4px solid #ff9800';
+  }
+  
+  el.innerHTML = '<strong>' + who + ':</strong> ' + text.replace(/\n/g, '<br>');
+  win.appendChild(el);
+  win.scrollTop = win.scrollHeight;
+}
+
+// Initial greeting
+window.addEventListener('load', function() {
+  appendMessage('AI', 'Привет! Я готов помочь. Что ты хочешь узнать?', 'assistant');
+});
+</script>
+{% endblock %}
