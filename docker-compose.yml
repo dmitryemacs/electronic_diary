@@ -8,6 +8,7 @@ services:
     volumes:
       - ./static/uploads:/app/static/uploads
       - .:/app
+    env_file: .env
     environment:
       - DATABASE_URL=postgresql://diary_user:diary_password@db:5432/diarydb
       - SECRET_KEY=your-secret-key-change-in-production
