@@ -1,16 +1,24 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
+import os
+import time
+import ast
+import logging
+from datetime import datetime
+from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField, IntegerField
 from wtforms.validators import DataRequired, Email, Length
-import os
-from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from openai import OpenAI, APIError, APIConnectionError, RateLimitError
 
 # Initialize Flask app
+# Load environment variables from .env file in the current directory
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+
 app = Flask(__name__)
 
 # Configure app
@@ -27,6 +35,34 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+# OpenRouter / OpenAI client setup (uses OpenRouter via OpenAI-compatible client)
+OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
+OPENROUTER_BASE_URL = os.getenv('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1')
+OPENROUTER_MODEL = os.getenv('OPENROUTER_MODEL', 'openai/gpt-3.5-turbo')
+SITE_URL = os.getenv('SITE_URL', 'http://localhost:5000')
+SITE_NAME = os.getenv('SITE_NAME', 'Electronic Diary')
+DISABLE_AI_CHAT = os.getenv('DISABLE_AI_CHAT', '').lower() in ('1', 'true', 'yes')
+
+if OPENROUTER_API_KEY:
+    ai_client = OpenAI(base_url=OPENROUTER_BASE_URL, api_key=OPENROUTER_API_KEY)
+else:
+    ai_client = None
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Log environment variables on startup for diagnostics
+logger.info("Environment variables loaded:")
+logger.info(f"  DATABASE_URL: {os.getenv('DATABASE_URL', 'NOT SET')[:30]}...")
+logger.info(f"  SECRET_KEY: {'SET' if os.getenv('SECRET_KEY') else 'NOT SET'}")
+logger.info(f"  OPENROUTER_API_KEY: {'SET' if os.getenv('OPENROUTER_API_KEY') else 'NOT SET'}")
+logger.info(f"  OPENROUTER_BASE_URL: {os.getenv('OPENROUTER_BASE_URL', 'NOT SET')}")
+logger.info(f"  OPENROUTER_MODEL: {os.getenv('OPENROUTER_MODEL', 'NOT SET')}")
+logger.info(f"  SITE_URL: {os.getenv('SITE_URL', 'NOT SET')}")
+logger.info(f"  SITE_NAME: {os.getenv('SITE_NAME', 'NOT SET')}")
+logger.info(f"  DISABLE_AI_CHAT: {os.getenv('DISABLE_AI_CHAT', 'NOT SET')}")
 
 # Database Models
 class User(UserMixin, db.Model):
@@ -652,6 +688,117 @@ def add_task_feedback(task_id, participant_id):
                          participant=participant,
                          submission=submission,
                          form=form)
+
+
+# Simple AI chat page and API using OpenRouter (via OpenAI-compatible client)
+@app.route('/ai')
+@login_required
+def ai_page():
+    return render_template('ai_chat.html')
+
+
+@app.route('/ai/chat', methods=['POST'])
+@login_required
+def ai_chat():
+    """Send user messages to OpenRouter API using the OpenAI SDK.
+
+    Expects JSON: {"message": "user text"}
+    Environment variables control configuration:
+      - OPENROUTER_API_KEY: (required) API key for OpenRouter
+      - OPENROUTER_MODEL: (optional) model name to use (default: openai/gpt-3.5-turbo)
+      - SITE_URL: (optional) your site URL for OpenRouter rankings (default: http://localhost:5000)
+      - SITE_NAME: (optional) your site name for OpenRouter rankings (default: Electronic Diary)
+      - DISABLE_AI_CHAT: (optional) set to "1" to disable AI chat feature
+    """
+    # Check if AI chat is disabled
+    if DISABLE_AI_CHAT:
+        logger.info('AI chat is disabled via DISABLE_AI_CHAT environment variable')
+        return jsonify({'error': 'AI chat feature is disabled'}), 503
+    
+    # Parse and validate request
+    try:
+        data = request.get_json() or {}
+    except Exception as e:
+        logger.error('Failed to parse JSON request: %s', e)
+        return jsonify({'error': 'Invalid JSON in request body'}), 400
+    
+    user_message = (data.get('message') or '').strip()
+
+    # Basic validation
+    if not user_message:
+        return jsonify({'error': 'Missing \'message\' in request body'}), 400
+    if len(user_message) > 2000:
+        return jsonify({'error': 'Message too long (max 2000 characters)'}), 400
+
+    # Require authenticated user
+    if not current_user.is_authenticated:
+        return jsonify({'error': 'Authentication required to use AI chat'}), 403
+
+    # Check API key configuration
+    if not OPENROUTER_API_KEY:
+        logger.error('OPENROUTER_API_KEY not configured')
+        return jsonify({'error': 'OpenRouter API key not configured (OPENROUTER_API_KEY)'}), 503
+
+    try:
+        logger.info(f'AI request from user {current_user.username}: {user_message[:50]}...')
+        
+        # Create OpenAI client configured to use OpenRouter
+        client = OpenAI(
+            base_url=OPENROUTER_BASE_URL,
+            api_key=OPENROUTER_API_KEY
+        )
+        
+        # Call OpenRouter API via OpenAI SDK
+        response = client.chat.completions.create(
+            model=OPENROUTER_MODEL,
+            messages=[{'role': 'user', 'content': user_message}],
+            temperature=0.7,
+            max_tokens=500,
+            extra_headers={
+                'HTTP-Referer': SITE_URL,
+                'X-OpenRouter-Title': SITE_NAME
+            }
+        )
+        
+        # Validate response structure
+        if not response or not response.choices or len(response.choices) == 0:
+            logger.error('Empty response from OpenRouter API')
+            return jsonify({'error': 'Empty response from OpenRouter API'}), 502
+        
+        # Extract reply from response
+        choice = response.choices[0]
+        if not choice.message or not choice.message.content:
+            logger.error('No message content in OpenRouter response')
+            return jsonify({'error': 'No content in API response'}), 502
+        
+        reply = choice.message.content
+        logger.info(f'AI response generated successfully (length: {len(reply)})')
+        return jsonify({'reply': reply})
+        
+    except APIConnectionError as e:
+        logger.error('Connection error contacting OpenRouter: %s', str(e))
+        return jsonify({
+            'error': 'Cannot connect to OpenRouter. Please check your network connection.',
+            'details': str(e)[:100]
+        }), 503
+    except RateLimitError as e:
+        logger.error('Rate limit error from OpenRouter: %s', str(e))
+        return jsonify({
+            'error': 'OpenRouter API rate limit exceeded. Try again later.',
+            'hint': 'Visit https://openrouter.ai/settings/integrations to add your API key'
+        }), 429
+    except APIError as e:
+        logger.error('OpenRouter API error: %s', str(e))
+        return jsonify({
+            'error': f'OpenRouter API error',
+            'details': str(e)[:200]
+        }), 502
+    except Exception as e:
+        logger.exception('Unexpected error while calling OpenRouter API')
+        return jsonify({
+            'error': 'AI Chat temporarily unavailable',
+            'details': str(e)[:100]
+        }), 503
 
 if __name__ == '__main__':
     with app.app_context():
